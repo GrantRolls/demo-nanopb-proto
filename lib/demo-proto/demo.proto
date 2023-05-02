@@ -1,0 +1,97 @@
+// Use proto3 for all new projects
+syntax = "proto3";
+
+package demo;
+
+import "google/protobuf/timestamp.proto";
+
+// Application level version validation
+enum Version {
+  VERSION_UNSPECIFIED = 0;
+
+  VERSION_CURRENT = 1;
+}
+
+// Data Containers/Classes
+
+enum Action {
+    // first entry in enum should ALWAYS be zero, in order to give clear distinction of EMPTY data in the message
+    // Eg. if zero is valid entry - unknown if the data is to be ignored or used
+    
+    // From the protobuf guide
+    // "There must be a zero value, so that we can use 0 as a numeric default value."
+    // "The zero value needs to be the first element, for compatibility with the proto2 semantics where the first enum value is always the default."
+    ACTION_UNSPECIFIED = 0;
+    
+    ACTION_SYNC_TIME = 1;
+    ACTION_SOFT_RESET = 2;
+}
+
+
+message Datapoint {
+    uint32 datapoint_tid = 1;
+    bytes data = 2;
+}
+
+// Sub Messages (Requests/responses)
+
+message ErrorData {
+    uint32 code = 1; 
+    string msg = 2;
+}
+
+message GetDatapointRequest {
+    repeated uint32 datapoint_tid = 1;
+}
+
+message GetDatapointResponse {
+    repeated Datapoint datapoints = 1;
+}
+
+message GetTimeRequest {
+    // Empty messages need a dummy variable for struct generation
+    uint32 dummy = 1;
+}
+
+message GetTimeResponse {
+    google.protobuf.Timestamp system_time = 1;
+}
+
+message ExecuteActionRequest {
+    Action action = 1;
+}
+
+message ExecuteActionResponse {
+    uint32 dummy = 1;
+}
+
+
+// Main Messages/Payloads
+
+// From Host -> Machine
+message Request {
+    Version version = 1;
+    // Note that all ints are 32bit - 8 and 16 are defined by using '.options'
+    uint32 ref_id = 2;
+
+    oneof type {
+        GetDatapointRequest get_datapoint  = 3;
+        GetTimeRequest get_time = 4;
+        ExecuteActionRequest execute_action = 5;
+    }
+}
+
+// From Machine -> Host
+message Response {
+    Version version = 1;
+    uint32 ref_id = 2;
+
+    ErrorData error = 3;
+
+    oneof type {
+        // Note that ids do not need to match their 'Request' counterparts
+        GetDatapointResponse get_datapoint = 4;
+        GetTimeResponse get_time = 5;
+        ExecuteActionResponse execute_action = 6;
+    }
+}

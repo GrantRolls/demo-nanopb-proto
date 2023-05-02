@@ -1,0 +1,29 @@
+
+# nanopb Compilation options
+# Enum names should already include the enum type name in the value
+# This removes chance of any name clashes
+* long_names:false
+
+# Define int size - otherwise will default 32bit
+*.ref_id int_size:IS_16 
+
+# Should define ALL array sizes - 
+# * leaving undefined will result in needing to use callbacks processing (less mem, harder impl)
+# * Defining fixed size will result in a fixed size array that will be auto encode/decoded (more mem, easier impl)
+# * Union message types (oneof) DONT handle callbacks well - prefer use fixed size
+
+*.datapoint_tid int_size:IS_16
+
+# Fixed size 'repeated' type
+*.GetDatapointRequest.datapoint_tid max_count:4
+*.GetDatapointResponse.datapoints max_count:4
+
+# Fixed-size 'byte' type
+*.Datapoint.data fixed_length:true
+*.Datapoint.data max_size:16
+
+# Variable-size type (for strings, variable bytes)
+*.ErrorData.msg fixed_length:false
+*.ErrorData.msg max_size:16
+
+*.ErrorData.code int_size:IS_32
