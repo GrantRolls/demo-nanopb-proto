@@ -17,6 +17,7 @@ demo.options Shows the extra options required with nanopb to generate the proto 
 * Python3
 * Pip packages installed from 'requirements.txt'
 * protoc in path https://github.com/protocolbuffers/protobuf/releases
+* Nanopb cloned/added to your source
 
 ### Run Script
 
